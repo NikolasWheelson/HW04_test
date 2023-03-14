@@ -21,23 +21,20 @@
         </div>
         <div class="card-body">
           {% include 'includes/errors_form.html' %}
-          <form method="post" 
-            action="
-              {% if is_edit %}
-              {% url 'posts:post_edit' form.instance.pk %}
-              {% else %} {% url 'posts:post_create' %}{% endif %}"
-            >  
-          {% csrf_token %}
-          {% include 'includes/fields.html' %}
-            <div class="d-flex justify-content-end">
-              <button type="submit" class="btn btn-primary">
-                {% if is_edit %}
-                  Редактировать пост
-                {% else %}
-                  сохранить
-                {% endif %}
-              </button>
-            </div>
+          
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+                {% include 'includes/fields.html' %}
+                  <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                      {% if is_edit %}
+                        Редактировать пост
+                      {% else %}
+                        сохранить
+                      {% endif %}
+                    </button>
+                  </div>
+            </form>
           </form>
         </div>
       </div>

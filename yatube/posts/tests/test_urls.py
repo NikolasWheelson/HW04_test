@@ -82,3 +82,9 @@ class TaskURLTests(TestCase):
             f"/posts/{self.post.id}/edit/")
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, f"/posts/{self.post.id}/")
+
+    def test_url_comment_authorized_client_on_post_detail(self):
+        response = self.authorized_client.get(
+            f"/posts/{self.post.id}/comment/")
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f"/posts/{self.post.id}/")

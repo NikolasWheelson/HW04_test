@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from .models import Post
+from .models import Post, Comment
 
 
 class PostForm(ModelForm):
@@ -8,4 +8,10 @@ class PostForm(ModelForm):
         model = Post
         labels = {'group': 'Группа', 'text': 'Сообщение'}
         help_texts = {'group': 'Выберите группу', 'text': 'Введите ссообщение'}
-        fields = ['group', 'text']
+        fields = ['group', 'text', 'image']
+
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']

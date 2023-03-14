@@ -146,6 +146,18 @@ class TaskPagesTests(TestCase):
             reverse('posts:group_list', kwargs={'slug': self.group.slug}))
         self.assertNotIn(newpost, response.context['page_obj'])
 
+    def test_cache_index(self):
+        post = Post.objects.create(
+            text='Новый тестовый текст поста',
+            author=self.user_author,
+            group=self.group,
+        )
+        response = self.authorized_author.get(reverse('posts:index'))
+        cache = response.content
+        post.delete()
+        response = self.authorized_author.get(reverse('posts:index'))
+        self.assertEqual(response.content, cache)
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod

@@ -19,6 +19,13 @@ SECRET_KEY = 'cdg4(g7@1p-p8b(ej)2t@&300m2d&dk&$8$#&12$!wau9_sek0'
 DEBUG = True
 
 
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -40,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sorl.thumbnail',
 
 ]
 
@@ -126,3 +134,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}

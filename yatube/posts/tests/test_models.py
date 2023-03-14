@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Group, Post
+from ..models import Group, Post, Comment
 
 User = get_user_model()
 
@@ -20,6 +20,11 @@ class PostModelTest(TestCase):
             author=cls.user,
             text='Тестовый пост длиной больше 15 симловов',
         )
+        cls.comment = Comment.objects.create(
+            text='Пробный тест длинной больше 15 символов',
+            author=cls.user,
+            post=cls.post
+        )
 
     def test_post_models_have_correct_object_names(self):
         post_value = str(self.post)
@@ -30,3 +35,8 @@ class PostModelTest(TestCase):
         group_value = str(self.group)
         expected_value = self.group.title
         self.assertEqual(group_value, expected_value)
+
+    def test_comment_models_have_correct_object_names(self):
+        comment_value = str(self.comment)
+        expected_value = self.comment.text[:15]
+        self.assertEqual(comment_value, expected_value)
