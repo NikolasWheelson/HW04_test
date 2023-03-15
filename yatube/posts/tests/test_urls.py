@@ -16,7 +16,6 @@ class TaskURLTests(TestCase):
             title="Тестовая группа",
             slug="test-slug"
         )
-        # Создадим запись в БД для проверки доступности адреса task/test-slug/
         cls.post = Post.objects.create(
             text='Тестовый текст',
             author=cls.user,
@@ -24,18 +23,14 @@ class TaskURLTests(TestCase):
         )
 
     def setUp(self):
-        # Создаем неавторизованный клиент
         self.guest_client = Client()
-        # Создаем второй клиент
         self.authorized_client = Client()
-        # Авторизуем пользователя
         self.authorized_client.force_login(self.user)
         self.nonauthor_client = Client()
         self.nonauthor_client.force_login(self.non_author)
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        # Шаблоны по адресам
         templates_url_names = {
             '/': 'posts/index.html',
             f'/group/{self.group.slug}/': 'posts/group_list.html',

@@ -2,8 +2,9 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.forms import fields
+from django.core.cache import cache
 
-from posts.models import Post, Group
+from posts.models import Post, Group, Follow
 
 User = get_user_model()
 
@@ -14,6 +15,7 @@ class TaskPagesTests(TestCase):
         super().setUpClass()
         cls.user_author = User.objects.create_user(username='author')
         cls.user = User.objects.create_user(username='User')
+        cls.unfollow = User.objects.create_user(username='StasBasov')
         cls.group = Group.objects.create(
             title='Тестовая группа',
             slug='slug-test',
@@ -28,11 +30,12 @@ class TaskPagesTests(TestCase):
     def setUp(self):
 
         self.guest_client = Client()
-        self.user = User.objects.create_user(username='StasBasov')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.authorized_author = Client()
         self.authorized_author.force_login(self.user_author)
+        self.unfollowing_client = Client()
+        self.unfollowing_client.force_login(self.unfollow)
 
     def test_pages_uses_correct_template(self):
         """URL-фдрес использует соответствующий шаблон."""
@@ -153,10 +156,44 @@ class TaskPagesTests(TestCase):
             group=self.group,
         )
         response = self.authorized_author.get(reverse('posts:index'))
-        cache = response.content
+        cache_1 = response.content
         post.delete()
         response = self.authorized_author.get(reverse('posts:index'))
-        self.assertEqual(response.content, cache)
+        self.assertEqual(response.content, cache_1)
+        cache.clear()
+        response = self.authorized_author.get(reverse('posts:index'))
+        self.assertNotEqual(response.content, cache_1)
+
+    def test_authorized_user_follow(self):
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        context = len(response.context['page_obj'])
+        response = self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.user_author}
+        ))
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(len(response.context['page_obj']), context + 1)
+        response = self.authorized_client.get(reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': self.user_author}
+        ))
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(len(response.context['page_obj']), context)
+
+    def test_unfollow_client(self):
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        context_auth = len(response.context['page_obj'])
+        response = self.unfollowing_client.get(reverse('posts:follow_index'))
+        context_unfollow = len(response.context['page_obj'])
+        Follow.objects.create(user=self.user, author=self.user_author)
+        Post.objects.create(
+            text='Новый тестовый текст поста',
+            author=self.user_author,
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(len(response.context['page_obj']), context_auth + 2)
+        response = self.unfollowing_client.get(reverse('posts:follow_index'))
+        self.assertEqual(len(response.context['page_obj']), context_unfollow)
 
 
 class PaginatorViewsTest(TestCase):
